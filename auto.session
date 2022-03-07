@@ -1,0 +1,91 @@
+import tkinter
+import tkinter.messagebox
+from selenium import webdriver
+import threading
+
+###############################################################################
+
+root = tkinter.Tk()
+root.title('Session de révision - FSEG')
+root.geometry("400x350")
+logo = tkinter.PhotoImage(file = "/Users/Filippo/Desktop/LOGO-FSEG.png")
+
+###############################################################################
+
+canvas = tkinter.Canvas(root, width = 410, height = 300, relief = 'raised', bg = 'white')
+canvas.pack(fill = "both", expand = True)
+
+###############################################################################
+
+label = tkinter.Label(root, text='Combien de temps souhaitez-vous réviser ?', relief = 'flat', bg = 'white')
+label.config(font=('futura', 14))
+canvas.create_window(200, 180, window=label)
+
+###############################################################################
+
+entry = tkinter.Entry(root)
+canvas.create_window(200, 210, window=entry)
+
+###############################################################################
+
+canvas.create_image(0, 0, image=logo, anchor = "nw")
+
+###############################################################################
+
+driver = []
+
+###############################################################################
+
+def session():
+    time = int(entry.get()) * 60
+    start_time = threading.Timer(time,end)
+    start_time.start()
+    
+    time2 = float(time) - 30
+    start_time2 = threading.Timer(time2,endmsg)
+    start_time2.start()
+        
+    global driver
+    
+    if not driver: 
+        driver = webdriver.Chrome(executable_path = '/Users/Filippo/Desktop/FSEG/TP/chromedriver.exe')
+        driver.get('https://ernest.unistra.fr')
+        driver.execute_script("window.open('https://bu.unistra.fr/')") 
+        driver.execute_script("window.open('https://www.ecosia.org')")
+        driver.switch_to.window(driver.window_handles[0])
+        
+###############################################################################
+
+def endmsg():
+    tkinter.messagebox.showinfo("La session se termine", "Il reste 30s avant la fin de la session, courage !")
+        
+###############################################################################
+    
+def end():
+    global driver 
+    
+    if driver:
+        driver.close()
+        driver = []
+        
+    choice = tkinter.messagebox.askquestion(title  = "Fin de la session", message = "C'est l'heure de la pause ! Souhaitez-vous continuer ?")
+    if choice == "yes" : session()
+    if choice == "no" : tkinter.messagebox.showinfo("Fin de la session", "A la prochaine !")
+    
+###############################################################################
+
+Button = tkinter.Button(root, text='Démarrer la session', command=session, pady=10)
+
+###############################################################################
+
+Button.pack()
+
+###############################################################################
+
+root.lift()
+root.attributes('-topmost',True)
+root.after_idle(root.attributes,'-topmost',False)
+
+###############################################################################
+
+root.mainloop()
